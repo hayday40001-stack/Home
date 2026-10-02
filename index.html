@@ -662,6 +662,51 @@ nav.tabs .dot{position:absolute;top:5px;left:calc(50% + 6px);min-width:17px;heig
 .toast button{border:0;background:none;color:var(--accent-soft);font-weight:700;padding:6px 8px;white-space:nowrap}
 html[data-skin="dark"] .toast button{color:#2E7048}
 @media (prefers-reduced-motion:reduce){.sheet,.toast,.switch input::after{transition:none}}
+
+/* floor plan */
+:root{--fl-wood:#F4E4C9;--fl-wl:#E8D3B0;--fl-tile:#EAF0F2;--fl-tl:#D3DDE2;--fl-out:#E6EFDC;--fl-ol:#C9D9B8;--wall:#3A342C}
+html[data-skin="dark"]{--fl-wood:#3B3228;--fl-wl:#4B4033;--fl-tile:#2A3236;--fl-tl:#3B474D;--fl-out:#28352A;--fl-ol:#3A4B3B;--wall:#E7E0D4}
+body[data-mod="plan"]{--accent:#2F6690;--accent-ink:#fff;--accent-soft:#DCE8F2}
+html[data-skin="dark"] body[data-mod="plan"]{--accent:#7FB2DA;--accent-ink:#0A1824;--accent-soft:#1B2D3D}
+.nv-plan[aria-current]{color:#2F6690!important}
+.fpwrap{padding:12px;overflow:hidden}
+.fpwrap.edit{background:var(--accent-soft)}
+.fpwrap svg{display:block;width:100%;height:auto;-webkit-user-select:none;user-select:none}
+.fpwrap.edit svg{touch-action:none}
+.fl-wood{fill:var(--fl-wood)}.fl-wl{stroke:var(--fl-wl);stroke-width:.8;fill:none}.fl-tile{fill:var(--fl-tile)}.fl-tl{stroke:var(--fl-tl);stroke-width:.8;fill:none}.fl-out{fill:var(--fl-out)}.fl-ol{fill:var(--fl-ol)}
+.fpgrid{fill:var(--accent);opacity:.35}
+.fpwall{fill:none;stroke:var(--wall);stroke-width:2.4}
+.fpr,.fpp{cursor:pointer;outline:none}
+.fpr text,.fpp text{pointer-events:none;fill:var(--ink)}
+.fpr .nmt{font-family:var(--display);font-weight:500}
+.fpr.dim,.fpp.dim{opacity:.25}
+.fpr.hit .fpwall{stroke:var(--accent);stroke-width:4}
+.fpr.sel .fpwall{stroke:var(--accent);stroke-width:3.2;stroke-dasharray:6 3}
+.fpr:focus-visible .fpwall{stroke:var(--accent);stroke-width:4}
+.edit .fpr{cursor:move}
+.fpbadge.due{fill:var(--over)}.fpbadge.near{fill:#E39A2B}
+.fpr text.fpbt{fill:#fff;font-size:6.6px;font-weight:600;font-family:var(--body)}
+.fph{cursor:nwse-resize}.fphv{fill:var(--accent);stroke:var(--surface);stroke-width:1.6}.fpha{stroke:var(--accent-ink);stroke-width:.9;fill:none}
+.fpp circle{fill:var(--surface);stroke:var(--wall);stroke-width:1.1}
+.fpp.hit circle{stroke:var(--accent);stroke-width:2.4}
+.fptool{display:flex;gap:8px;margin-bottom:12px;align-items:stretch}
+.fptool .search{flex:1;margin:0;min-width:0}
+.fptool .btn{flex:none;padding:10px 14px}
+.fpbar{display:flex;gap:8px;margin-bottom:12px}
+.fpbar .btn{flex:1;padding:11px 8px}
+.fpfl{overflow-x:auto}.fpfl button{white-space:nowrap}
+.fpleg{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin:10px 4px 0}
+.fpleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.fprow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;text-align:left;padding:11px 16px;border-top:1px solid var(--line);color:var(--text)}
+.fprow:first-child{border-top:0}
+.fprow .em{font-size:1.3rem;width:28px;text-align:center;flex:none}
+.fprow .nm{flex:1;min-width:0;color:var(--ink)}
+.fprow .nm small{display:block;color:var(--muted);font-size:.8rem}
+.fprow .chev{color:var(--muted);font-size:1.3rem}
+.fprow .st{flex:none}
+.fph3{font-size:1rem;margin:18px 0 8px}
+.fpl{box-shadow:none;border:1px solid var(--line)}
+.fpsz{display:flex;gap:10px}.fpsz .field{flex:1}
 </style>
 </head>
 <body>
@@ -1245,6 +1290,7 @@ function viewClean(){
    '';
   if(!S.clean.length&&cleanView==='today')return h+`<div class="card empty"><span class="big">🧹</span><p>ยังไม่มีงานทำความสะอาด เพิ่มห้องแล้วเลือกชุดงานแนะนำได้เลย</p><button class="btn primary" data-addroom>+ เพิ่มห้อง</button></div>`;
   if(cleanView==='rooms'){
+    h+=`<button class="card rrow" data-tab="plan"><span class="rem">🗺️</span><span class="ri"><b>ดูแบบแผนผังบ้าน</b><small>เห็นทุกห้องพร้อมสิ่งที่ต้องดูแล วาดผังเองได้</small></span></button>`;
     h+=cleanRooms().map(r=>{const ts=tasksOf(r),last=roomLast(r),nx=roomNext(r),td=tToday(r).filter(t=>!tDoneToday(t)).length;
       return `<button class="card rrow" data-room="${esc(r)}"><span class="rem">${roomEmo(r)}</span><span class="ri"><b>${esc(r)}</b>
       <small>${ts.length?ts.length+' งาน'+(last?', ทำล่าสุด '+thDate(last):''):'ยังไม่มีงาน แตะเพื่อใช้ชุดงานแนะนำ'}</small>
@@ -2303,15 +2349,15 @@ function medBoughtSheet(s,m){
 
 /* ================= app shell: sections, header, nav ================= */
 const ALIAS={today:'ctoday',care:'cclean',plants:'cplant',me:'more',cal:'ccal'};
-const SECTION={meds:'meds',bills:'bills',stock:'stock',sshop:'stock',ctoday:'today',home:'fridge',fridge:'fridge',menu:'fridge',shop:'fridge',cclean:'care',citems:'care',cplant:'plants',more:'more',energy:'more',etools:'more',ccal:'more',stats:'more',settings:'more'};
-const MOD={meds:'meds',bills:'bills',stock:'stock',sshop:'stock',ctoday:'home',home:'fridge',fridge:'fridge',menu:'fridge',shop:'fridge',cclean:'cleaning',citems:'replacement',cplant:'plant',more:'home',energy:'energy',etools:'energy',ccal:'home',stats:'home',settings:'home'};
+const SECTION={plan:'plan',meds:'meds',bills:'bills',stock:'stock',sshop:'stock',ctoday:'today',home:'fridge',fridge:'fridge',menu:'fridge',shop:'fridge',cclean:'care',citems:'care',cplant:'plants',more:'more',energy:'more',etools:'more',ccal:'more',stats:'more',settings:'more'};
+const MOD={plan:'plan',meds:'meds',bills:'bills',stock:'stock',sshop:'stock',ctoday:'home',home:'fridge',fridge:'fridge',menu:'fridge',shop:'fridge',cclean:'cleaning',citems:'replacement',cplant:'plant',more:'home',energy:'energy',etools:'energy',ccal:'home',stats:'home',settings:'home'};
 const BACK={energy:['more','เพิ่มเติม'],etools:['energy','ค่าไฟบ้าน'],ccal:['more','เพิ่มเติม'],stats:['more','เพิ่มเติม'],settings:['more','เพิ่มเติม']};
 const PLUS_TABS={meds:1,bills:1,stock:1,sshop:1,ctoday:1,home:1,fridge:1,menu:1,shop:1,cclean:1,citems:1,cplant:1,energy:1,ccal:1};
 const PLUS_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
 let NOHEAD=false,lastFridge='fridge',lastCare='cclean',lastStock='stock';
-const NAVABLE={fridge:['🧊','ตู้เย็น','fridge'],stock:['📦','สต็อก','stock'],care:['🧹','ดูแลบ้าน','cclean'],plants:['🌱','ต้นไม้','cplant'],bills:['💳','บิล','bills'],meds:['💊','ตู้ยา','meds']};
+const NAVABLE={plan:['🗺️','แผนผัง','plan'],fridge:['🧊','ตู้เย็น','fridge'],stock:['📦','สต็อก','stock'],care:['🧹','ดูแลบ้าน','cclean'],plants:['🌱','ต้นไม้','cplant'],bills:['💳','บิล','bills'],meds:['💊','ตู้ยา','meds']};
 const navList=()=>{const n=(S.settings.nav||[]).filter(k=>NAVABLE[k]);return n.length?n.slice(0,3):['fridge','stock','care']};
-function head(t,sub){if(NOHEAD)return '';const sc=SECTION[tab],bk=BACK[tab]||(NAVABLE[sc]&&!navList().includes(sc)&&['fridge','stock','cclean','cplant','bills','meds'].includes(tab)?['more','เพิ่มเติม']:null);
+function head(t,sub){if(NOHEAD)return '';const sc=SECTION[tab],bk=BACK[tab]||(NAVABLE[sc]&&!navList().includes(sc)&&['fridge','stock','cclean','cplant','bills','meds','plan'].includes(tab)?['more','เพิ่มเติม']:null);
   return `${bk?`<button class="back" data-tab="${bk[0]}">‹ ${bk[1]}</button>`:''}<header class="top"><div><h1>${t}</h1>${sub?`<p>${sub}</p>`:''}</div>${PLUS_TABS[tab]&&!(tab==='energy'&&!E().setup)?`<button class="me plusb" data-hplus aria-label="เพิ่ม">${PLUS_SVG}</button>`:''}</header>`}
 function subnav(items){return `<div class="subnav" role="tablist">${items.map(([l,on,attr])=>`<button role="tab" class="${on?'on':''}" aria-selected="${on}" ${attr}>${l}</button>`).join('')}</div>`}
 function go(n){n=ALIAS[n]||n;if(!SECTION[n])n='ctoday';
@@ -2352,6 +2398,7 @@ function mtile(t,ic,l,sub,hot){return `<button class="mtile" data-tab="${t}"><sp
 function viewMore(){
   const e=E(),nl=navList(),T=[];
   const add=(k,t,ic,l,sub,hot)=>{if(!nl.includes(k))T.push(mtile(t,ic,l,sub,hot))};
+  {const pd=fpDue();add('plan','plan','🗺️','แผนผังบ้าน',pd?pd+' ห้องต้องดูแล':'ดูของตามห้อง',pd)}
   add('fridge','fridge','🧊','ตู้เย็น',S.fridge.length+' รายการ');
   add('stock','stock','📦','สต็อกบ้าน',S.stock.length+' รายการ');
   add('care','cclean','🧹','ดูแลบ้าน','ทำความสะอาด, ของใช้');
@@ -2392,15 +2439,262 @@ const NI2={
  care:'<path d="M14.5 3.5 10 12"/><path d="M6.5 12h8l2 8.5H4.5z"/><path d="M8.5 16v4.5M12 16v4.5"/>',
  plants:'<path d="M12 21v-8"/><path d="M12 13c0-4.5 3-7.5 8-8-.3 5-3.4 8-8 8z"/><path d="M12 15c0-3.5-2.4-6-6.5-6.3.2 3.9 2.7 6.3 6.5 6.3z"/>',
  more:'<path d="M4 7h16M4 12h16M4 17h16"/>'};
-const NI3={meds:'<rect x="4" y="6" width="16" height="14" rx="2.5"/><path d="M9 6V4.5h6V6M12 10v6M9 13h6"/>',bills:'<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18M7 14.5h4"/>',stock:'<path d="M3.5 8 12 3.5 20.5 8v9L12 21.5 3.5 17z"/><path d="M3.5 8 12 12.5 20.5 8M12 12.5v9"/>'};
+const NI3={plan:'<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M3.5 11.5h7v9M10.5 3.5v4.5M14.5 11.5h6"/>',meds:'<rect x="4" y="6" width="16" height="14" rx="2.5"/><path d="M9 6V4.5h6V6M12 10v6M9 13h6"/>',bills:'<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18M7 14.5h4"/>',stock:'<path d="M3.5 8 12 3.5 20.5 8v9L12 21.5 3.5 17z"/><path d="M3.5 8 12 12.5 20.5 8M12 12.5v9"/>'};
 function navHtml(){
   const sec=SECTION[tab],td=todayData(),nl=navList();
   const dots={today:td.rooms.filter(x=>!x.done).length+td.pl.filter(x=>!x.done).length+td.it.filter(x=>!x.done).length,
     fridge:S.fridge.filter(f=>{const s=stOf(left(f));return s==='near'||s==='over'}).length,stock:S.stock.filter(x=>sState(x)==='out').length,
-    care:td.rooms.filter(x=>!x.done).length+td.it.filter(x=>!x.done).length,plants:td.pl.filter(x=>!x.done).length,bills:S.bills.filter(b=>bSt(b)==='over').length,meds:S.meds.filter(m=>mSt(m)==='expired').length,more:0};
+    care:td.rooms.filter(x=>!x.done).length+td.it.filter(x=>!x.done).length,plants:td.pl.filter(x=>!x.done).length,plan:fpDue(),bills:S.bills.filter(b=>bSt(b)==='over').length,meds:S.meds.filter(m=>mSt(m)==='expired').length,more:0};
   const cur=nl.includes(sec)||sec==='today'?sec:'more';
   return [['today','วันนี้'],...nl.map(k=>[k,NAVABLE[k][1]]),['more','เพิ่มเติม']].map(([k,l])=>`<button data-nav="${k}" class="nv-${k}" ${cur===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NI3[k]||NI2[k]}</svg>${l}${dots[k]?`<span class="dot">${dots[k]}</span>`:''}</button>`).join('');
 }
+/* ================= floor plan ================= */
+const FP_W=20,FP_U=10;
+const PIN_T={valve:['🚰','วาล์วน้ำหลัก'],breaker:['⚡','ตู้เบรกเกอร์'],ext:['🧯','ถังดับเพลิง'],gas:['🔥','วาล์วแก๊ส'],key:['🔑','กุญแจสำรอง'],meter:['📟','มิเตอร์น้ำ/ไฟ'],aid:['🩹','ชุดปฐมพยาบาล'],other:['📍','จุดอื่นๆ']};
+const FPX={fridge:['🧊','ตู้เย็น'],meds:['💊','ตู้ยา']};
+let planEdit=false,planFl=0,planQ='',planSel=null,pDrag=null;
+function fpSize(n){return /นอน/.test(n)?[7,6]:/น้ำ|ส้วม/.test(n)?[4,4]:/ครัว/.test(n)?[6,6]:/นั่งเล่น|รับแขก/.test(n)?[9,7]:/ทำงาน/.test(n)?[6,5]:/ระเบียง|สวน|ลาน|จอด/.test(n)?[8,3]:[5,5]}
+function fpPack(names,rooms){
+  let x=0,y=rooms.reduce((m,r)=>Math.max(m,r.y+r.h),0),rowH=0;const out=[];
+  names.forEach(n=>{const[w,h]=fpSize(n);if(x+w>FP_W){x=0;y+=rowH;rowH=0}const r={id:uid(),name:n,x,y,w,h,fx:[]};rooms.push(r);out.push(r);x+=w;rowH=Math.max(rowH,h)});
+  return out;
+}
+function fpInit(){
+  if(S.plan&&Array.isArray(S.plan.floors)&&S.plan.floors.length)return false;
+  const rooms=[];fpPack(S.rooms.filter(r=>r!=='ทั้งบ้าน'),rooms);
+  const k=rooms.find(r=>/ครัว/.test(r.name));if(k)k.fx.push('fridge');
+  const b=rooms.find(r=>/น้ำ/.test(r.name));if(b)b.fx.push('meds');
+  S.plan={floors:[{id:uid(),name:'ชั้น 1',rooms,pins:[]}]};return true;
+}
+const fpF=()=>{if(planFl>=S.plan.floors.length)planFl=0;return S.plan.floors[planFl]};
+const fpAllRooms=()=>S.plan?S.plan.floors.flatMap(f=>f.rooms):[];
+const fpHas=(r,k)=>(r.fx||[]).includes(k);
+function fpMeds(r){return S.meds.filter(m=>m.loc===r.name||(fpHas(r,'meds')&&(!m.loc||m.loc==='ตู้ยา')))}
+function fpInfo(r){
+  const n=r.name,o={due:0,near:0};
+  o.tasks=tasksOf(n);o.cleanDue=tToday(n).filter(t=>!tDoneToday(t));o.due+=o.cleanDue.length;
+  o.items=S.items.filter(i=>i.room===n).sort(cSort);o.items.forEach(i=>{const s=cSt(i);if(s==='due')o.due++;else if(s==='near')o.near++});
+  o.plants=S.plants.filter(p=>p.loc===n);o.plants.forEach(p=>{if(Object.keys(PACTS).some(k=>pAct(p,k)&&aLeft(p,k)<=0&&!aDoneToday(p,k)))o.due++});
+  o.stock=S.stock.filter(x=>x.loc===n);o.stock.forEach(x=>{const s=sState(x);if(s==='out')o.due++;else if(s==='low')o.near++});
+  o.fr={over:0,near:0};if(fpHas(r,'fridge'))S.fridge.forEach(f=>{const s=stOf(left(f));if(s==='over'){o.due++;o.fr.over++}else if(s==='near'){o.near++;o.fr.near++}});
+  o.meds=fpMeds(r);o.md={bad:0,warn:0};o.meds.forEach(m=>{const s=mSt(m);if(s==='expired'){o.due++;o.md.bad++}else if(s!=='ok'){o.near++;o.md.warn++}});
+  return o;
+}
+function fpMatch(r,q){
+  if(!q)return[];const n=r.name,h=[],t=s=>!!s&&String(s).toLowerCase().includes(q);
+  if(t(n))h.push([roomEmo(n),n,'ห้อง',`data-fproom="${r.id}"`]);
+  S.stock.filter(x=>x.loc===n&&t(x.name)).forEach(x=>h.push([sEmo(x),x.name,'ของที่เก็บไว้',`data-si="${x.id}"`]));
+  S.items.filter(i=>i.room===n&&t(i.name)).forEach(i=>h.push([i.emoji||'📦',i.name,'ของใช้เปลี่ยนรอบ',`data-ci="${i.id}"`]));
+  S.plants.filter(p=>p.loc===n&&(t(p.name)||t(p.nick))).forEach(p=>h.push(['🪴',p.nick||p.name,'ต้นไม้',`data-pl="${p.id}"`]));
+  tasksOf(n).filter(x=>t(x.name)).forEach(x=>h.push(['🧹',x.name,'งานทำความสะอาด',`data-room="${esc(n)}"`]));
+  if(fpHas(r,'fridge'))S.fridge.filter(f=>t(f.name)).forEach(f=>h.push([emo(f.name,f.cat),f.name,'ในตู้เย็น',`data-edit="${f.id}"`]));
+  fpMeds(r).filter(m=>t(m.name)).forEach(m=>h.push([mEmo(m),m.name,'ในตู้ยา',`data-mi="${m.id}"`]));
+  return h;
+}
+const fpBase=s=>s.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g,'').length;
+function fpSvg(){
+  const F=fpF(),q=planQ.trim().toLowerCase(),U=FP_U;
+  const H=Math.max(12,...F.rooms.map(r=>r.y+r.h),...F.pins.map(p=>p.y+1))+(planEdit?4:0.5);
+  let s=`<defs><pattern id="fpTile" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" class="fl-tile"/><path d="M10 0V10M0 10H10" class="fl-tl"/></pattern>
+  <pattern id="fpWood" width="40" height="7" patternUnits="userSpaceOnUse"><rect width="40" height="7" class="fl-wood"/><path d="M0 7H40M24 0V7" class="fl-wl"/></pattern>
+  <pattern id="fpOut" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" class="fl-out"/><circle cx="4" cy="4" r=".9" class="fl-ol"/></pattern>
+  <pattern id="fpDots" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="0" cy="0" r=".7" class="fpgrid"/></pattern></defs>`;
+  if(planEdit)s+=`<rect x="0" y="0" width="${FP_W*U}" height="${H*U}" fill="url(#fpDots)"/>`;
+  const order=[...F.rooms];if(planEdit&&planSel){const i=order.findIndex(r=>r.id===planSel);if(i>=0)order.push(order.splice(i,1)[0])}
+  let hs='';
+  order.forEach(r=>{
+    const x=r.x*U,y=r.y*U,w=r.w*U,h=r.h*U,inf=fpInfo(r),hit=q?fpMatch(r,q).length:0;
+    const fill=/ระเบียง|สวน|ลาน|จอด|ซักล้าง/.test(r.name)?'url(#fpOut)':/น้ำ|ครัว|ส้วม|ซัก/.test(r.name)?'url(#fpTile)':'url(#fpWood)';
+    const cls=['fpr',q&&!hit?'dim':'',hit?'hit':'',planEdit&&planSel===r.id?'sel':''].join(' ');
+    const fs=Math.max(4.6,Math.min(7.5,(w-8)/(Math.max(1,fpBase(r.name))*0.6)));
+    const showEmo=h>=34&&w>=26,cy=y+h/2;
+    s+=`<g class="${cls}" data-prm="${r.id}" ${planEdit?'':`tabindex="0" role="button" aria-label="${esc(r.name)}"`}>
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>
+      <rect class="fpwall" x="${x}" y="${y}" width="${w}" height="${h}"/>
+      ${showEmo?`<text x="${x+w/2}" y="${cy-2}" text-anchor="middle" font-size="10">${roomEmo(r.name)}</text>`:''}
+      <text class="nmt" x="${x+w/2}" y="${showEmo?cy+fs+2:cy+fs/3}" text-anchor="middle" font-size="${fs.toFixed(1)}">${esc(r.name)}</text>`;
+    const fx=(r.fx||[]).map(k=>FPX[k][0]).join('');
+    if(fx&&h>=24)s+=`<text x="${x+4}" y="${y+10}" font-size="7">${fx}</text>`;
+    const c=inf.due||inf.near;
+    if(c&&!planEdit)s+=`<circle class="fpbadge ${inf.due?'due':'near'}" cx="${x+w-7.5}" cy="${y+7.5}" r="5.6"/><text class="fpbt" x="${x+w-7.5}" y="${y+9.9}" text-anchor="middle">${c>99?'99':c}</text>`;
+    if(planEdit)hs+=`<g data-prh="${r.id}" class="fph"><circle cx="${x+w}" cy="${y+h}" r="9" fill="transparent"/><circle class="fphv" cx="${x+w}" cy="${y+h}" r="4"/><path class="fpha" d="M${x+w-2} ${y+h+.2}h2.2v-2.2"/></g>`;
+    s+='</g>';
+  });
+  F.pins.forEach(p=>{const t=PIN_T[p.k]||PIN_T.other,hit=q&&((p.label||t[1]).toLowerCase().includes(q)||(p.note||'').toLowerCase().includes(q));
+    s+=`<g class="fpp ${q&&!hit?'dim':''} ${hit?'hit':''}" data-ppn="${p.id}" ${planEdit?'':`tabindex="0" role="button" aria-label="${esc(p.label||t[1])}"`}><circle cx="${p.x*U}" cy="${p.y*U}" r="6.4"/><text x="${p.x*U}" y="${p.y*U+2.6}" text-anchor="middle" font-size="7.4">${t[0]}</text></g>`});
+  s+=hs;
+  return{vb:`-3 -3 ${FP_W*U+6} ${H*U+6}`,inner:s};
+}
+function fpResults(){
+  const q=planQ.trim().toLowerCase();if(!q)return '';const rows=[];
+  S.plan.floors.forEach((F,fi)=>{F.rooms.forEach(r=>fpMatch(r,q).forEach(m=>rows.push([...m,r.name,F,fi])));
+    F.pins.forEach(p=>{const t=PIN_T[p.k]||PIN_T.other;if((p.label||t[1]).toLowerCase().includes(q)||(p.note||'').toLowerCase().includes(q))rows.push([t[0],p.label||t[1],'จุดสำคัญ',`data-fppin2="${p.id}"`,p.note||'',F,fi])})});
+  if(!rows.length)return `<div class="card insight" style="margin-top:12px">ไม่พบ "${esc(planQ.trim())}" ในห้องไหนเลย</div>`;
+  const multi=S.plan.floors.length>1;
+  return `<h2 class="sec">เจอ ${rows.length} รายการ</h2><div class="card list">${rows.slice(0,40).map(([e,n,kind,a,where,F])=>`<button class="fprow" ${a}><span class="em">${e}</span><span class="nm">${esc(n)}<small>${esc(kind)}${where?', '+esc(where):''}${multi?', '+esc(F.name):''}</small></span><span class="chev">›</span></button>`).join('')}</div>`;
+}
+function fpDue(){if(!S.plan)return 0;return fpAllRooms().filter(r=>fpInfo(r).due).length}
+function viewPlan(){
+  if(fpInit())save();
+  const F=fpF(),fl=S.plan.floors,placed=new Set(fpAllRooms().map(r=>r.name));
+  const missing=S.rooms.filter(r=>r!=='ทั้งบ้าน'&&!placed.has(r));
+  let h=head('🗺️ แผนผังบ้าน',planEdit?'กำลังแก้ไขผัง':'แตะห้องเพื่อดูสิ่งที่ต้องดูแล');
+  if(fl.length>1||planEdit)h+=`<div class="seg fpfl" style="margin-bottom:12px">${fl.map((f,i)=>`<button class="${i===planFl?'on':''}" data-fpfl="${i}">${esc(f.name)}</button>`).join('')}${planEdit?`<button data-fpfloor aria-label="จัดการชั้น">＋ ชั้น</button>`:''}</div>`;
+  if(planEdit)h+=`<div class="fpbar"><button class="btn" data-fpadd>＋ ห้อง</button><button class="btn" data-fppin>📍 จุดสำคัญ</button><button class="btn primary" data-fpdone>เสร็จ</button></div>`;
+  else h+=`<div class="fptool"><div class="search">${IC.search}<input id="fpq" type="search" placeholder="หาของ เช่น ไขควง, ผ้าปู" value="${esc(planQ)}" autocomplete="off" aria-label="ค้นหาของในบ้าน"></div><button class="btn" data-fpedit>✏️ แก้ไขผัง</button></div>`;
+  const o=fpSvg();
+  h+=`<div class="card fpwrap ${planEdit?'edit':''}"><svg id="fpsvg" viewBox="${o.vb}" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="แผนผัง${esc(F.name)}">${o.inner}</svg>
+    ${!F.rooms.length?`<div class="empty" style="padding:6px 8px 10px"><p>${planEdit?'ชั้นนี้ยังไม่มีห้อง กด ＋ ห้อง เพื่อเริ่มวาด':'ยังไม่มีห้องในผัง'}</p>${planEdit?'':'<button class="btn primary" data-fpedit>เริ่มวาดผัง</button>'}</div>`:''}</div>`;
+  if(planEdit)h+=`<p class="hint">ลากห้องเพื่อย้าย ลากจุดที่มุมขวาล่างเพื่อปรับขนาด แตะห้องหรือจุดสำคัญเพื่อเปลี่ยนชื่อหรือลบ 1 ช่องตารางประมาณ 50 ซม.</p>`;
+  else h+=`<div class="fpleg"><span><i style="background:var(--over)"></i>ถึงรอบหรือหมดแล้ว</span><span><i style="background:#E39A2B"></i>ใกล้ถึงรอบ</span><span>🧊 ตู้เย็น</span><span>💊 ตู้ยา</span></div><div id="fpRes">${fpResults()}</div>`;
+  if(missing.length)h+=`<h2 class="sec">ห้องที่ยังไม่อยู่ในผัง<small>แตะเพื่อวาง</small></h2><div class="chips">${missing.map(r=>`<button class="chip" data-fpplace="${esc(r)}">${roomEmo(r)} ${esc(r)}</button>`).join('')}</div>`;
+  if(!planEdit&&F.pins.length)h+=`<h2 class="sec">จุดสำคัญ${fl.length>1?`<small>${esc(F.name)}</small>`:''}</h2><div class="card list">${F.pins.map(p=>{const t=PIN_T[p.k]||PIN_T.other,r=fpRoomAt(F,p);return `<button class="fprow" data-fppin2="${p.id}"><span class="em">${t[0]}</span><span class="nm">${esc(p.label||t[1])}<small>${esc([r?r.name:'',p.note].filter(Boolean).join(', ')||'ไม่มีบันทึก')}</small></span><span class="chev">›</span></button>`}).join('')}</div>`;
+  return h;
+}
+function fpRoomAt(F,p){return F.rooms.find(r=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)}
+function fpRedraw(){const svg=$('#fpsvg');if(!svg)return;const o=fpSvg();svg.setAttribute('viewBox',o.vb);svg.innerHTML=o.inner}
+function fpFind(id){for(const F of S.plan.floors){const r=F.rooms.find(x=>x.id===id);if(r)return{r,F};const p=F.pins.find(x=>x.id===id);if(p)return{p,F}}return{}}
+function wirePlan(){
+  const svg=$('#fpsvg');
+  document.querySelectorAll('[data-fpedit]').forEach(b=>b.onclick=()=>{planEdit=true;planQ='';render()});
+  document.querySelectorAll('[data-fpdone]').forEach(b=>b.onclick=()=>{planEdit=false;planSel=null;render();toast('บันทึกผังแล้ว')});
+  document.querySelectorAll('[data-fpadd]').forEach(b=>b.onclick=()=>fpRoomForm(null));
+  document.querySelectorAll('[data-fppin]').forEach(b=>b.onclick=()=>fpPinForm(null));
+  document.querySelectorAll('[data-fpfloor]').forEach(b=>b.onclick=fpFloorSheet);
+  document.querySelectorAll('[data-fpfl]').forEach(b=>b.onclick=()=>{planFl=+b.dataset.fpfl;planSel=null;render()});
+  document.querySelectorAll('[data-fpplace]').forEach(b=>b.onclick=()=>{const n=b.dataset.fpplace;snap();const r=fpPack([n],fpF().rooms)[0];planEdit=true;planSel=r.id;save();render();toast('วาง'+n+'แล้ว ลากไปตำแหน่งที่ต้องการได้เลย',{undo:true})});
+  const res=$('#fpRes');if(res)res.onclick=e=>{const b=e.target.closest('[data-fproom]');if(b){const{r}=fpFind(b.dataset.fproom);if(r)fpRoomSheet(r)}};
+  document.querySelectorAll('[data-fppin2]').forEach(b=>b.addEventListener('click',()=>{const{p,F}=fpFind(b.dataset.fppin2);if(p)fpPinSheet(p,F)}));
+  const q=$('#fpq');if(q)q.oninput=()=>{planQ=q.value;fpRedraw();$('#fpRes').innerHTML=fpResults();document.querySelectorAll('#fpRes [data-fppin2]').forEach(b=>b.addEventListener('click',()=>{const{p,F}=fpFind(b.dataset.fppin2);if(p)fpPinSheet(p,F)}))};
+  if(!svg)return;
+  const pt=e=>{const m=svg.getScreenCTM();if(!m)return{x:0,y:0};const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return{x:p.x/FP_U,y:p.y/FP_U}};
+  const sn=v=>Math.round(v*2)/2;
+  svg.onpointerdown=e=>{
+    if(!planEdit||pDrag)return;
+    const F=fpF(),hd=e.target.closest('[data-prh]'),pn=e.target.closest('[data-ppn]'),rm=e.target.closest('[data-prm]');
+    let o=null,kind=null;
+    if(pn){o=F.pins.find(p=>p.id===pn.dataset.ppn);kind='pin'}else if(hd){o=F.rooms.find(r=>r.id===hd.dataset.prh);kind='size'}else if(rm){o=F.rooms.find(r=>r.id===rm.dataset.prm);kind='move'}
+    if(!o)return;e.preventDefault();
+    pDrag={kind,o,p:pt(e),orig:{...o},moved:false,id:e.pointerId,before:JSON.stringify(S)};
+    try{svg.setPointerCapture(e.pointerId)}catch(_){}
+    if(kind!=='pin'&&planSel!==o.id){planSel=o.id;fpRedraw()}
+  };
+  svg.onpointermove=e=>{
+    if(!pDrag||e.pointerId!==pDrag.id)return;
+    const p=pt(e),dx=p.x-pDrag.p.x,dy=p.y-pDrag.p.y;
+    if(!pDrag.moved&&Math.hypot(dx,dy)<0.35)return;
+    pDrag.moved=true;const o=pDrag.o,g=pDrag.orig;
+    if(pDrag.kind==='size'){o.w=Math.max(2,Math.min(FP_W-o.x,sn(g.w+dx)));o.h=Math.max(2,Math.min(60,sn(g.h+dy)))}
+    else if(pDrag.kind==='pin'){o.x=Math.max(0.5,Math.min(FP_W-0.5,sn(g.x+dx)));o.y=Math.max(0.5,Math.min(64,sn(g.y+dy)))}
+    else{o.x=Math.max(0,Math.min(FP_W-o.w,sn(g.x+dx)));o.y=Math.max(0,Math.min(60,sn(g.y+dy)))}
+    fpRedraw();
+  };
+  const end=e=>{if(!pDrag||(e&&e.pointerId!==pDrag.id))return;const d=pDrag;pDrag=null;
+    if(d.moved){undoSnap=d.before;undoPh=null;save()}
+    else if(e&&e.type==='pointerup'){if(d.kind==='pin')fpPinForm(d.o);else fpRoomForm(d.o)}};
+  svg.onpointerup=end;svg.onpointercancel=end;
+  const openAt=el=>{const pn=el.closest('[data-ppn]');if(pn){const{p,F}=fpFind(pn.dataset.ppn);if(p)fpPinSheet(p,F);return}
+    const rm=el.closest('[data-prm]');if(rm){const{r}=fpFind(rm.dataset.prm);if(r)fpRoomSheet(r)}};
+  svg.onclick=e=>{if(!planEdit)openAt(e.target)};
+  svg.onkeydown=e=>{if(!planEdit&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAt(e.target)}};
+}
+function fpRow(e,n,sub,st,stText,attr){return `<button class="fprow" ${attr}><span class="em">${e}</span><span class="nm">${esc(n)}${sub?`<small>${esc(sub)}</small>`:''}</span>${stText?`<span class="st ${st}">${esc(stText)}</span>`:'<span class="chev">›</span>'}</button>`}
+function fpRoomSheet(r){
+  const n=r.name,o=fpInfo(r),F=fpFind(r.id).F,pins=F?F.pins.filter(p=>fpRoomAt(F,p)===r):[];
+  const sum=o.due?'มี '+o.due+' อย่างที่ต้องจัดการ':o.near?'มี '+o.near+' อย่างใกล้ถึงรอบ':'เรียบร้อยดี';
+  let b='';
+  b+=`<h3 class="fph3">🧹 ทำความสะอาด</h3><div class="card list fpl">`+(o.tasks.length?
+    fpRow(roomEmo(n),o.cleanDue.length?'วันนี้มี '+o.cleanDue.length+' งาน':'วันนี้ไม่มีงาน',o.cleanDue.length?o.cleanDue.map(t=>t.name).slice(0,3).join(', '):(roomNext(n)?'ครั้งต่อไป '+relDay(diff(today(),roomNext(n).d)):''),o.cleanDue.length?'over':'ok',o.cleanDue.length?'ต้องทำ':'',`data-room="${esc(n)}"`)
+    :fpRow('➕','ตั้งงานทำความสะอาดห้องนี้','เลือกจากชุดงานแนะนำได้','','',`data-room="${esc(n)}"`))+`</div>`;
+  if(fpHas(r,'fridge')||fpHas(r,'meds')){b+=`<h3 class="fph3">ตู้ในห้องนี้</h3><div class="card list fpl">`;
+    if(fpHas(r,'fridge'))b+=fpRow('🧊','ตู้เย็น',S.fridge.length+' รายการ',o.fr.over?'over':o.fr.near?'near':'',o.fr.over?'หมดอายุ '+o.fr.over:o.fr.near?'ใกล้หมด '+o.fr.near:'','data-tab="fridge"');
+    if(fpHas(r,'meds'))b+=fpRow('💊','ตู้ยา',o.meds.length+' รายการ',o.md.bad?'over':o.md.warn?'near':'',o.md.bad?'หมดอายุ '+o.md.bad:o.md.warn?'ต้องดู '+o.md.warn:'','data-tab="meds"');
+    b+='</div>'}
+  if(o.items.length)b+=`<h3 class="fph3">🔄 ของใช้เปลี่ยนรอบ</h3><div class="card list fpl">${o.items.map(i=>{const s=cSt(i);return fpRow(i.emoji||'📦',i.name,every(i),s==='due'?'over':s==='near'?'near':'ok',cDaysText(i),`data-ci="${i.id}"`)}).join('')}</div>`;
+  if(o.plants.length)b+=`<h3 class="fph3">🌱 ต้นไม้</h3><div class="card list fpl">${o.plants.map(p=>{const due=Object.keys(PACTS).filter(k=>pAct(p,k)&&aLeft(p,k)<=0&&!aDoneToday(p,k));return fpRow('🪴',p.nick||p.name,p.nick?p.name:'',due.length?'over':'ok',due.length?due.map(k=>PACTS[k][1]).join(', '):'เรียบร้อย',`data-pl="${p.id}"`)}).join('')}</div>`;
+  if(o.stock.length)b+=`<h3 class="fph3">📦 ของที่เก็บไว้</h3><div class="card list fpl">${o.stock.map(x=>{const s=sState(x);return fpRow(sEmo(x),x.name,x.sub||'',s==='out'?'over':s==='low'?'near':'ok',s==='out'?'หมดแล้ว':s==='low'?'เหลือน้อย':'มีอยู่',`data-si="${x.id}"`)}).join('')}</div>`;
+  if(pins.length)b+=`<h3 class="fph3">📍 จุดสำคัญ</h3><div class="card list fpl">${pins.map(p=>{const t=PIN_T[p.k]||PIN_T.other;return fpRow(t[0],p.label||t[1],p.note||'','','',`data-fppin3="${p.id}"`)}).join('')}</div>`;
+  const empty=!o.items.length&&!o.plants.length&&!o.stock.length;
+  openSheet(`<div style="display:flex;gap:14px;align-items:center"><div class="pic" style="width:56px;height:56px">${roomEmo(n)}</div><div><h3 style="margin:0">${esc(n)}</h3><div class="hint" style="margin:0;color:${o.due?'var(--over)':'var(--muted)'}">${sum}</div></div></div>
+  ${b}${empty?`<p class="hint">ยังไม่มีของในห้องนี้ ตอนเพิ่มของใช้ ต้นไม้ หรือของในสต็อก ให้เลือกห้องเป็น "${esc(n)}" แล้วจะมาขึ้นที่นี่</p>`:''}
+  <div class="btns"><button class="btn" id="fpEditR">✏️ แก้ไขห้องนี้</button></div>`);
+  $('#fpEditR').onclick=()=>{planEdit=true;planSel=r.id;const f=S.plan.floors.findIndex(x=>x.rooms.includes(r));if(f>=0)planFl=f;closeSheet();render();fpRoomForm(r)};
+  $('#sheetIn').querySelectorAll('[data-fppin3]').forEach(x=>x.onclick=()=>{const{p,F}=fpFind(x.dataset.fppin3);if(p)fpPinSheet(p,F)});
+}
+function fpRenameAll(a,b){
+  const i=S.rooms.indexOf(a);if(i>=0){if(S.rooms.includes(b))S.rooms.splice(i,1);else S.rooms[i]=b}
+  S.clean.forEach(t=>{if(t.room===a)t.room=b});S.items.forEach(t=>{if(t.room===a)t.room=b});
+  S.plants.forEach(p=>{if(p.loc===a)p.loc=b});S.stock.forEach(x=>{if(x.loc===a)x.loc=b});S.meds.forEach(m=>{if(m.loc===a)m.loc=b});
+  fpAllRooms().forEach(r=>{if(r.name===a)r.name=b});
+}
+function fpRoomForm(r){
+  const isNew=!r,F=fpF(),placed=new Set(fpAllRooms().map(x=>x.name));
+  const sug=[...new Set([...S.rooms.filter(x=>x!=='ทั้งบ้าน'),...ROOM_SUGGEST,'ห้องเก็บของ','ระเบียง','ที่จอดรถ'])].filter(x=>!placed.has(x)||(r&&x===r.name));
+  const used=r?(S.clean.some(t=>t.room===r.name)||S.items.some(t=>t.room===r.name)||S.plants.some(p=>p.loc===r.name)||S.stock.some(x=>x.loc===r.name)):false;
+  const g=r||{name:'',w:5,h:5,fx:[]};
+  openSheet(`<h3>${isNew?'เพิ่มห้องในผัง':'แก้ไข'+esc(r.name)}</h3>
+  <div class="field"><label for="fpName">ชื่อห้อง</label><input class="inp" id="fpName" value="${esc(g.name)}" placeholder="เช่น ห้องนอนลูก" ${isNew?'autofocus':''}></div>
+  <div class="chips" style="margin:-4px 0 14px">${sug.filter(x=>x!==g.name).slice(0,12).map(x=>`<button type="button" class="chip" data-fps="${esc(x)}">${roomEmo(x)} ${esc(x)}</button>`).join('')}</div>
+  ${used?`<div class="field" id="fpRenW" hidden><div><label class="switch"><span>เปลี่ยนชื่อในงานทำความสะอาด ของใช้ ต้นไม้ และสต็อกด้วย</span><input type="checkbox" id="fpRenAll" checked></label></div></div>`:''}
+  <div class="fpsz"><div class="field"><label for="fpW">กว้าง (ช่อง)</label><input class="inp" id="fpW" type="number" inputmode="decimal" min="2" max="${FP_W}" step="0.5" value="${g.w}"></div><div class="field"><label for="fpH">ยาว (ช่อง)</label><input class="inp" id="fpH" type="number" inputmode="decimal" min="2" max="60" step="0.5" value="${g.h}"></div></div>
+  <p class="hint" style="margin-top:-8px">1 ช่องประมาณ 50 ซม. ปรับละเอียดได้ด้วยการลากมุมห้องในผัง</p>
+  <div class="field"><span class="lbl">ตู้ที่อยู่ในห้องนี้</span><div>
+   <label class="switch"><span>🧊 ตู้เย็น</span><input type="checkbox" id="fpFr" ${fpHas(g,'fridge')?'checked':''}></label>
+   <label class="switch" style="margin-top:10px"><span>💊 ตู้ยา</span><input type="checkbox" id="fpMd" ${fpHas(g,'meds')?'checked':''}></label></div></div>
+  <div class="btns"><button class="btn primary" id="fpSave">${isNew?'เพิ่มห้อง':'บันทึก'}</button></div>
+  ${isNew?'':`<button class="btn block" id="fpDel" style="margin-top:10px;background:none;color:var(--over)">เอาห้องนี้ออกจากผัง</button><p class="hint" style="text-align:center;margin-top:0">ของและงานในห้องนี้ยังอยู่ครบ</p>`}`);
+  const nm=$('#fpName'),rw=$('#fpRenW');
+  const chk=()=>{if(rw)rw.hidden=nm.value.trim()===r.name||!nm.value.trim()};
+  nm.addEventListener('input',chk);
+  $('#sheetIn').querySelectorAll('[data-fps]').forEach(b=>b.onclick=()=>{nm.value=b.dataset.fps;if(isNew){const[w,h]=fpSize(b.dataset.fps);$('#fpW').value=w;$('#fpH').value=h}chk()});
+  $('#fpSave').onclick=()=>{
+    const n=nm.value.trim();if(!n){nm.focus();toast('ใส่ชื่อห้องก่อน');return}
+    const w=Math.max(2,Math.min(FP_W,Math.round((parseFloat($('#fpW').value)||5)*2)/2)),h=Math.max(2,Math.min(60,Math.round((parseFloat($('#fpH').value)||5)*2)/2));
+    snap();let room=r;
+    if(isNew){room=fpPack([n],F.rooms)[0];}
+    else if(n!==r.name){if(used&&$('#fpRenAll')&&$('#fpRenAll').checked)fpRenameAll(r.name,n);else r.name=n}
+    room.w=w;room.h=h;if(room.x+room.w>FP_W)room.x=Math.max(0,FP_W-room.w);
+    const fx=[];if($('#fpFr').checked)fx.push('fridge');if($('#fpMd').checked)fx.push('meds');
+    fx.forEach(k=>fpAllRooms().forEach(x=>{if(x!==room&&fpHas(x,k))x.fx=x.fx.filter(y=>y!==k)}));
+    room.fx=fx;
+    if(!S.rooms.includes(room.name))S.rooms.splice(Math.max(0,S.rooms.indexOf('ทั้งบ้าน')>=0?S.rooms.indexOf('ทั้งบ้าน'):S.rooms.length),0,room.name);
+    planSel=room.id;save();closeSheet();render();toast(isNew?'เพิ่ม'+n+'แล้ว ลากไปวางตรงที่ต้องการได้เลย':'บันทึก'+n+'แล้ว',{undo:true});
+  };
+  const del=$('#fpDel');if(del)del.onclick=()=>{snap();F.rooms.splice(F.rooms.indexOf(r),1);S.plan.floors.forEach(f=>{const i=f.rooms.indexOf(r);if(i>=0)f.rooms.splice(i,1)});planSel=null;save();closeSheet();render();toast('เอา'+r.name+'ออกจากผังแล้ว',{undo:true})};
+}
+function fpPinForm(p){
+  const isNew=!p,F=fpF();const g=p||{k:'valve',label:'',note:''};
+  openSheet(`<h3>${isNew?'เพิ่มจุดสำคัญ':'แก้ไขจุดสำคัญ'}</h3><p class="lead">จุดที่ต้องหาให้เจอตอนฉุกเฉินหรือตอนช่างมา</p>
+  <div class="field"><span class="lbl">ประเภท</span>${chipGroup('fpK',Object.entries(PIN_T).map(([k,v])=>[k,v[0]+' '+v[1]]),g.k)}</div>
+  <div class="field"><label for="fpL">ชื่อที่แสดง (ไม่ใส่ก็ได้)</label><input class="inp" id="fpL" value="${esc(g.label||'')}" placeholder="${esc(PIN_T[g.k][1])}"></div>
+  <div class="field"><label for="fpNote">บันทึก</label><input class="inp" id="fpNote" value="${esc(g.note||'')}" placeholder="เช่น หลังเครื่องซักผ้า หมุนตามเข็มเพื่อปิด"></div>
+  <div class="btns"><button class="btn primary" id="fpPSave">${isNew?'เพิ่มในผัง':'บันทึก'}</button></div>
+  ${isNew?'':`<button class="btn block" id="fpPDel" style="margin-top:10px;background:none;color:var(--over)">ลบจุดนี้</button>`}`);
+  wireChips('fpK');
+  $('#fpK').addEventListener('click',()=>{const k=pick('fpK');if(k&&PIN_T[k])$('#fpL').placeholder=PIN_T[k][1]});
+  $('#fpPSave').onclick=()=>{snap();const k=pick('fpK')||'other';let x=p;
+    if(isNew){const sr=F.rooms.find(r=>r.id===planSel)||F.rooms[0];x={id:uid(),k,x:sr?sr.x+Math.min(1.5,sr.w/2):2,y:sr?sr.y+Math.min(1.5,sr.h/2):2};F.pins.push(x)}
+    x.k=k;x.label=$('#fpL').value.trim();x.note=$('#fpNote').value.trim();save();closeSheet();if(isNew&&!planEdit)planEdit=true;render();toast(isNew?'เพิ่มจุดแล้ว ลากไปวางตรงที่ต้องการได้เลย':'บันทึกแล้ว',{undo:true})};
+  const del=$('#fpPDel');if(del)del.onclick=()=>{snap();S.plan.floors.forEach(f=>f.pins=f.pins.filter(y=>y!==p));save();closeSheet();render();toast('ลบจุดแล้ว',{undo:true})};
+}
+function fpPinSheet(p,F){
+  const t=PIN_T[p.k]||PIN_T.other,r=F?fpRoomAt(F,p):null;
+  openSheet(`<div style="display:flex;gap:14px;align-items:center"><div class="pic" style="width:56px;height:56px">${t[0]}</div><div><h3 style="margin:0">${esc(p.label||t[1])}</h3><div class="hint" style="margin:0">${esc([r?r.name:'',F&&S.plan.floors.length>1?F.name:''].filter(Boolean).join(', ')||'ในผังบ้าน')}</div></div></div>
+  <div class="card insight" style="margin-top:14px">${p.note?esc(p.note):'ยังไม่มีบันทึก เพิ่มวิธีใช้หรือตำแหน่งละเอียดได้'}</div>
+  <div class="btns"><button class="btn" id="fpPE">✏️ แก้ไข</button></div>`);
+  $('#fpPE').onclick=()=>{fpPinForm(p)};
+}
+function fpFloorSheet(){
+  const F=fpF(),fl=S.plan.floors;
+  openSheet(`<h3>จัดการชั้น</h3>
+  <div class="field"><label for="fpFN">ชื่อชั้นที่เลือกอยู่</label><input class="inp" id="fpFN" value="${esc(F.name)}"></div>
+  <div class="btns" style="margin-top:0"><button class="btn primary" id="fpFS">บันทึกชื่อ</button><button class="btn" id="fpFA">＋ เพิ่มชั้นใหม่</button></div>
+  ${fl.length>1?`<button class="btn block" id="fpFD" style="margin-top:10px;background:none;color:var(--over)">ลบ${esc(F.name)}ออกจากผัง</button>`:''}`);
+  $('#fpFS').onclick=()=>{const v=$('#fpFN').value.trim();if(!v)return;F.name=v;save();closeSheet();render()};
+  $('#fpFA').onclick=()=>{snap();fl.push({id:uid(),name:'ชั้น '+(fl.length+1),rooms:[],pins:[]});planFl=fl.length-1;save();closeSheet();render();toast('เพิ่มชั้นแล้ว กด ＋ ห้อง เพื่อวาดห้อง',{undo:true})};
+  const d=$('#fpFD');if(d)d.onclick=()=>{snap();fl.splice(planFl,1);planFl=0;save();closeSheet();render();toast('ลบชั้นแล้ว',{undo:true})};
+}
+
 function render(){try{renderInner()}catch(e){showErr('render: '+e.message);try{$('#navIn').innerHTML=navHtml()}catch(_){}}}
 function renderInner(){
   document.documentElement.dataset.skin=S.settings.skin||'cream';
@@ -2417,7 +2711,7 @@ function renderInner(){
   }else if(sec==='care'){
     h=head('🧹 ดูแลบ้าน',thToday())+subnav([['วันนี้ทำห้องไหน',tab==='cclean'&&cleanView==='today','data-csub="today"'],['ห้องทั้งหมด',tab==='cclean'&&cleanView==='rooms','data-csub="rooms"'],['รอบเปลี่ยนของใช้',tab==='citems','data-csub="items"']]);
     NOHEAD=true;try{h+=tab==='citems'?viewCItems():viewClean()}finally{NOHEAD=false}
-  }else h=({ctoday:viewToday,cplant:viewPlants,bills:viewBills,meds:viewMeds,more:viewMore,energy:viewEnergy,etools:viewETools,ccal:viewCCal,stats:viewHomeStats,settings:viewSettingsPage})[tab]();
+  }else h=({plan:viewPlan,ctoday:viewToday,cplant:viewPlants,bills:viewBills,meds:viewMeds,more:viewMore,energy:viewEnergy,etools:viewETools,ccal:viewCCal,stats:viewHomeStats,settings:viewSettingsPage})[tab]();
   $('#app').innerHTML=h;
   $('#navIn').innerHTML=navHtml();
   const mq=$('#mq');if(mq)mq.oninput=()=>{mquery=mq.value;if(mview()==='scene')document.querySelectorAll('#mc3d .ft').forEach(b=>{const m=S.meds.find(x=>x.id===b.dataset.mi);b.classList.toggle('dim',!!m&&((mcat!=='all'&&m.cat!==mcat)||(mquery.trim()&&!m.name.includes(mquery.trim()))))});else $('#mRest').innerHTML=medsRest()};
@@ -2429,6 +2723,7 @@ function renderInner(){
   const du=$('#defUnit');if(du)du.onchange=()=>{S.settings.unit=du.value;save()};
   const est=$('#esType');if(est)est.onclick=e=>{const b=e.target.closest('button');if(b)est.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
   wireETools();
+  if(tab==='plan')wirePlan();
 }
 function addChooser(){
   openSheet(`<h3>เพิ่มอะไร?</h3><div class="btns" style="margin-top:0;flex-direction:column">
@@ -2650,6 +2945,7 @@ document.addEventListener('click',e=>{
   if('bkDl' in d){bkDownload();return}
   if('bkImp' in d){bkImport();return}
   if('hplus' in d){if(tab==='meds'){medForm()}else if(tab==='bills')bForm();else if(['home','fridge','menu'].includes(tab))fridgeForm();else if(tab==='stock')stockForm();else if(tab==='shop'||tab==='sshop'){const x=$('#shopIn');if(x)x.focus()}else if(tab==='cclean')addRoomSheet();else if(tab==='citems')cAdd();else if(tab==='cplant')plantForm();else if(tab==='energy')eReadingSheet();else addChooser();return}
+  if(d.nav==='plan'){go('plan');return}
   if(d.nav){go(d.nav==='today'?'ctoday':d.nav==='fridge'?lastFridge:d.nav==='stock'?lastStock:d.nav==='care'?lastCare:d.nav==='plants'?'cplant':'more');return}
   if(d.csub){if(d.csub==='items')go('citems');else{cleanView=d.csub;go('cclean')}return}
   if('ereading' in d){if(E().setup)eReadingSheet();else go('energy');return}
